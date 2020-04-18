@@ -1,0 +1,103 @@
+
+Z
+java:S1854¿">Remove this useless assignment to local variable "lambdaExpr".(İåšÒüÿÿÿÿ
+J
+java:S1144‹".Remove this unused private "nodePrint" method.(©˜á¾ıÿÿÿÿ
+H
+java:S1135{"2Complete the task associated to this TODO comment.(ùõ›í
+_
+java:S1854È"CRemove this useless assignment to local variable "memberValuePair".(µ¯áíşÿÿÿÿ
+k
+java:S1854P"URemove this useless assignment to local variable "explicitConstructorInvocationStmt".(·¡èõ
+H
+java:S1135u"2Complete the task associated to this TODO comment.(ùõ›í
+]
+java:S1192ñ"FDefine a constant instead of duplicating this literal "Zero " 3 times.(ú£¾Ê
+I
+java:S1128".Remove this unused import 'java.util.EnumSet'.(ÍäÚ“úÿÿÿÿ
+E
+java:S1481ä".Remove this unused "nodeClass" local variable.(ô¦ü¡
+D	java:S108Ê")Either remove or fill this block of code.(¡Õ€øÿÿÿÿ
+P
+java:S1481,"5Remove this unused "intersectionType" local variable.(øØüÿÿÿÿ
+g
+java:S1192ó"KDefine a constant instead of duplicating this literal "Note Zero " 3 times.(¿à°ùÿÿÿÿ
+Z
+java:S1854œ"CRemove this useless assignment to local variable "fieldAccessExpr".(¤ñòô
+_
+java:S1854,"DRemove this useless assignment to local variable "intersectionType".(øØüÿÿÿÿ
+Z
+java:S1854?"DRemove this useless assignment to local variable "fieldDeclaration".(şå‘¤
+I
+java:S1481)".Remove this unused "unionType" local variable.(â†áİúÿÿÿÿ
+=	java:S108S")Either remove or fill this block of code.(òìå-
+>	java:S108ƒ")Either remove or fill this block of code.(ÌŒ™P
+^
+java:S1854Å"BRemove this useless assignment to local variable "instanceOfExpr".(çÏ˜¤ûÿÿÿÿ
+Q
+java:S14815";Remove this unused "initializerDeclaration" local variable.(ıˆ£†
+\
+java:S1481P"FRemove this unused "explicitConstructorInvocationStmt" local variable.(·¡èõ
+O
+java:S1481Å"3Remove this unused "instanceOfExpr" local variable.(çÏ˜¤ûÿÿÿÿ
+H
+java:S1481Â"1Remove this unused "enclosedExpr" local variable.(òĞ˜
+I
+java:S1481†"-Remove this unused "castExpr" local variable.(Çš‰èşÿÿÿÿ
+>	java:S108R")Either remove or fill this block of code.(Â˜¤×
+P
+java:S1481¯"9Remove this unused "arrayInitializerExpr" local variable.(ë¿‚È
+I
+java:S1135Í"2Complete the task associated to this TODO comment.(ùõ›í
+U
+java:S1854i"?Remove this useless assignment to local variable "catchClause".(¼°¬Ë
+E
+java:S1611:"/Remove the parentheses around the "c" parameter(›Ú˜
+`
+java:S18545"JRemove this useless assignment to local variable "initializerDeclaration".(ıˆ£†
+B
+java:S1602"",Remove useless curly braces around statement(­¥ÔÏ
+Y
+java:S1854Œ"BRemove this useless assignment to local variable "methodCallExpr".(ø§„
+_
+java:S1854¯"HRemove this useless assignment to local variable "arrayInitializerExpr".(ë¿‚È
+P
+java:S1481È"4Remove this unused "memberValuePair" local variable.(µ¯áíşÿÿÿÿ
+B
+java:S1602w",Remove useless curly braces around statement(Á”ªĞ
+K
+java:S1481?"5Remove this unused "fieldDeclaration" local variable.(şå‘¤
+H
+java:S1135f"2Complete the task associated to this TODO comment.(ùõ›í
+F
+java:S1144‡"0Remove this unused private "stringPrint" method.(‚”Í=
+n
+java:S3776á"RRefactor this method to reduce its Cognitive Complexity from 18 to the 15 allowed.(Å„÷ñøÿÿÿÿ
+o	java:S120"ZRename this package name to match the regular expression '^[a-z_]+(\.[a-z_][a-z0-9_]*)*$'.(†Áçİ
+X
+java:S1854†"<Remove this useless assignment to local variable "castExpr".(Çš‰èşÿÿÿÿ
+g
+java:S1192"LDefine a constant instead of duplicating this literal "UnknownType" 3 times.(¼È½ëşÿÿÿÿ
+>	java:S108Q")Either remove or fill this block of code.(¾ëÆÔ
+m
+java:S3776"RRefactor this method to reduce its Cognitive Complexity from 64 to the 15 allowed.(„»Š°ûÿÿÿÿ
+T
+java:S1854ä"=Remove this useless assignment to local variable "nodeClass".(ô¦ü¡
+B
+java:S1602%",Remove useless curly braces around statement(ÿÌ™á
+L
+java:S1611w"6Remove the parentheses around the "consumer" parameter(Á”ªĞ
+Z
+java:S1128"?Remove this unused import 'com.github.javaparser.ast.Modifier'.(Ü†‚øÿÿÿÿ
+W
+java:S1854Â"@Remove this useless assignment to local variable "enclosedExpr".(òĞ˜
+K
+java:S1481œ"4Remove this unused "fieldAccessExpr" local variable.(¤ñòô
+J
+java:S1481Œ"3Remove this unused "methodCallExpr" local variable.(ø§„
+X
+java:S1854)"=Remove this useless assignment to local variable "unionType".(â†áİúÿÿÿÿ
+K
+java:S1481¿"/Remove this unused "lambdaExpr" local variable.(İåšÒüÿÿÿÿ
+F
+java:S1481i"0Remove this unused "catchClause" local variable.(¼°¬Ë

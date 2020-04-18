@@ -1,0 +1,30 @@
+
+o	java:S120"ZRename this package name to match the regular expression '^[a-z_]+(\.[a-z_][a-z0-9_]*)*$'.(†Áçİ
+>
+java:S1148x"#Use a logger to log this exception.(€ÉÔ…ıÿÿÿÿ
+R
+java:S3655L"7Call "Optional#isPresent()" before accessing the value.(øçÙ„ùÿÿÿÿ
+R
+java:S3655K"7Call "Optional#isPresent()" before accessing the value.(Øóâıÿÿÿÿ
+R
+java:S3655T"7Call "Optional#isPresent()" before accessing the value.(×Ì÷ºıÿÿÿÿ
+M
+java:S3655e"7Call "Optional#isPresent()" before accessing the value.(£áÎÄ
+R
+java:S3655U"7Call "Optional#isPresent()" before accessing the value.(ïÙ¬ùÿÿÿÿ
+M
+java:S3655W"7Call "Optional#isPresent()" before accessing the value.(¤¦öĞ
+R
+java:S3655d"7Call "Optional#isPresent()" before accessing the value.(Øóâıÿÿÿÿ
+M	java:S1065"9Replace this use of System.out or System.err by a logger.(ñáä5
+c	java:S100:"NRename this method name to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(æ‹˜•
+h
+java:S3776:"RRefactor this method to reduce its Cognitive Complexity from 20 to the 15 allowed.(æ‹˜•
+S	java:S106Z"9Replace this use of System.out or System.err by a logger.(ïÔ‘»ıÿÿÿÿ
+M
+java:S1135["2Complete the task associated to this TODO comment.(çüÚ›úÿÿÿÿ
+H
+java:S1135h"2Complete the task associated to this TODO comment.(ÕÉÁÎ
+S	java:S106u"9Replace this use of System.out or System.err by a logger.(ìíåÒıÿÿÿÿ
+V	java:S125;"<This block of commented-out lines of code should be removed.(‰´œ—úÿÿÿÿ
+Q	java:S125>"<This block of commented-out lines of code should be removed.(•õåş
