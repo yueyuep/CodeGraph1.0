@@ -24,12 +24,12 @@ import java.util.List;
  */
 public class GunTree {
     public static void main(String[] args) throws Exception {
-        String file1 = "H:\\CodeGraph1.0\\src\\main\\java\\data\\A.java";
-        String file2 = "H:\\CodeGraph1.0\\src\\main\\java\\data\\B.java";
+        String file1 = "H:\\CodeGraph1.0\\src\\main\\resources\\data\\A.java";
+        String file2 = "H:\\CodeGraph1.0\\src\\main\\resources\\data\\B.java";
         HashMap<String, TreeContext> tc1 = new MethodDeclationVisitor().generateTreeContextList(new FileReader(new File(file1))); // retrieve the default generator for the file
         HashMap<String, TreeContext> tc2 = new MethodDeclationVisitor().generateTreeContextList(new FileReader(new File(file2))); // retrieve the default generator for the file
         ITree src = tc1.get("main").getRoot();
-        ITree dst = tc2.get("main").getRoot();
+        ITree dst = tc2.get("test").getRoot();
         Matcher m = Matchers.getInstance().getMatcher(src, dst);
         // retrieve the default matcher
         m.match();

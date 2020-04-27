@@ -1,8 +1,8 @@
 package Graph.Base;
 
 import Graph.AST2Graph;
-import Graph.GraphParse;
-import Graph.WraperNode;
+import Graph.Unity.MethodCall;
+import Graph.RangeNode;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.google.common.graph.MutableNetwork;
@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 /**
  * Create by lp on 2020/2/9
  */
-public class DataToJson {
+public class HeadAndBodyToJson {
     /*head序列化的字段信息
      * fileName:
      * version:
@@ -51,7 +51,7 @@ public class DataToJson {
     public static class Body {
         private AST2Graph ast2Graph;
         private MethodDeclaration methodDeclaration;
-        private HashMap<String, HashMap<MethodDeclaration, String>> calledMethod = new HashMap<>();
+        private HashMap<MethodCallExpr, MethodCall> calledMethod = new HashMap<>();
 
         @Expose
         @SerializedName(value = "fileName")
@@ -78,14 +78,14 @@ public class DataToJson {
         private List<String> nodeAttribute = new ArrayList<>();
 
         public Body(File file, String fileName, String version, String methodName, MethodDeclaration methodDeclaration,
-                    HashMap<String, HashMap<MethodDeclaration, String>> calledMethod) {
+                    HashMap<MethodCallExpr, MethodCall> calledMethod) {
             this.ast2Graph = AST2Graph.newInstance(file.getPath());
             this.methodDeclaration = methodDeclaration;
             this.calledMethod = calledMethod;
-
             this.fileName = fileName;
             this.version = version;
             this.methodName = methodName;
+
         }
 
 
@@ -102,26 +102,18 @@ public class DataToJson {
                 nodeMap.put(node, nodeIndex);
                 nodeIndex++;
                 //+++++++++++++++++++++++++++++++++++++++++构建节点调用函数位置关系++++++++++++++++++++++++++++++++++++++++
-                if (!vistedMethodCallex.containsKey(node) && node instanceof WraperNode) {
-                    //当callMethod得到的结果为零的时候，一定是不存在函数调用的。直接过滤掉。
-                    if (((WraperNode) node).getPnode() instanceof MethodCallExpr) {
-                        MethodCallExpr methodCallExpr = ((MethodCallExpr) ((WraperNode) node).getPnode()).asMethodCallExpr();
-                        //如果当前结点是函数调用的结点
+                if (!vistedMethodCallex.containsKey(node) && node instanceof RangeNode) {
+                    //找到函数调用节点。
+                    if (((RangeNode) node).getmNode() instanceof MethodCallExpr) {
+                        MethodCallExpr methodCallExpr = ((MethodCallExpr) ((RangeNode) node).getmNode()).asMethodCallExpr();
+                        //如果不在我们的函数调用处理当中，则跳过
+                        if (!this.calledMethod.containsKey(methodCallExpr)) continue;
                         int index = nodeMap.get(node);
                         vistedMethodCallex.put(methodCallExpr, index);
-                        for (String fileName : this.calledMethod.keySet()) {
-                            for (MethodDeclaration methodDeclaration : this.calledMethod.get(fileName).keySet()) {
-                                // TODO
-                                //  MethodCallExpr和 MethodDeclation的比较这部分逻辑问题
-                                //  目前： 仅仅通过函数名，和参数个数来进行匹配
-                                //  待完善： 通过函数名和参数类型来进行匹配
-                                if (methodDeclaration.getNameAsString().equals(methodCallExpr.getNameAsString()) && methodDeclaration.getParameters().size() == methodCallExpr.getArguments().size()) {
-                                    String className = this.calledMethod.get(fileName).get(methodDeclaration);
-                                    String res = fileName.concat("-").concat(methodDeclaration.getNameAsString()).concat("-").concat(className).concat("-").concat(new GraphParse().getMethodParameter(methodDeclaration));
-                                    this.callMethodNameReferTo.put(index, res);
-                                }
-                            }
-                        }
+                        //需要找到函数调用MethodCall 将其转换成字符串。
+                        // TODO 这里的hashmap比较，需要确定能够找到
+                        String res = MethodCall.mcToString(this.calledMethod.get(methodCallExpr));
+                        this.callMethodNameReferTo.put(index, res);
                     }
                 }
             }
@@ -138,14 +130,15 @@ public class DataToJson {
                 Integer index = nodeMap.get(node);
                 tempNode = tempNode.stream().filter(n -> n != index).collect(Collectors.toList());
                 this.successors.add(tempNode);
-                addAttribute(node, this.nodeAttribute);
+                addStringAttribute(node, this.nodeAttribute);
             }
 
         }
 
-        public void addAttribute(Object node, List<String> nodeAttribute) {
-            if (node instanceof WraperNode) {
-                nodeAttribute.add(new Graph2Json().travelNode(((WraperNode) node).getPnode()));
+        /*添加字符属性*/
+        public void addStringAttribute(Object node, List<String> nodeAttribute) {
+            if (node instanceof RangeNode) {
+                nodeAttribute.add(new AddFeature().travelNode(((RangeNode) node).getmNode()));
             } else if (node instanceof String) {
                 nodeAttribute.add(node.toString());
             } else {

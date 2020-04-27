@@ -13,8 +13,9 @@ import java.util.EnumSet;
 
 /**
  * Create by lp on 2020/2/9
+ * 为我们的node添加信息
  */
-public class Graph2Json {
+public class AddFeature {
     private StringBuilder mStringBuilder = new StringBuilder();
 
     public <T extends Node> String travelNode(T node) {

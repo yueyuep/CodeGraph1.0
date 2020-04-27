@@ -26,16 +26,13 @@ import com.github.javaparser.utils.SourceRoot;
  */
 public class Test {
     public static void main(String[] args) throws IOException {
-
         // You might want to set your own path instead of using the FileChooser
         Path path = openDirFileChooser().toPath();
-
         ProjectRoot projectRoot = new SymbolSolverCollectionStrategy().collect(path);
-
         for (SourceRoot sourceRoot : projectRoot.getSourceRoots()) {
             sourceRoot.getParserConfiguration().setAttributeComments(false); // Ignore comments
+            Path path1=sourceRoot.getRoot();
             List<ParseResult<CompilationUnit>> test = sourceRoot.tryToParse();
-
             for (ParseResult<CompilationUnit> r : sourceRoot.tryToParse()) {
                 r.getResult().ifPresent(compilationUnit -> {
                     for (ClassOrInterfaceDeclaration c : compilationUnit.findAll(ClassOrInterfaceDeclaration.class)) {
@@ -50,19 +47,17 @@ public class Test {
 
     private static int countCalledMethods(ClassOrInterfaceDeclaration c) {
         List<MethodDeclaration> methods = c.getMethods();
-
         Set<MethodDeclaration> calledMethods = new HashSet<MethodDeclaration>(methods);
         ArrayDeque<MethodDeclaration> todo = new ArrayDeque<MethodDeclaration>(methods);
-
         while (!todo.isEmpty()) {
             MethodDeclaration m = todo.poll();
-
             for (MethodCallExpr expr : m.findAll(MethodCallExpr.class)) {
                 ResolvedMethodDeclaration rmd = expr.resolve();
 
                 if (rmd instanceof JavaParserMethodDeclaration) {
                     JavaParserMethodDeclaration jpmd = (JavaParserMethodDeclaration) rmd;
                     MethodDeclaration mdec = jpmd.getWrappedNode();
+                    String className=jpmd.getQualifiedSignature();
 
                     if (!calledMethods.contains(mdec)) {
                         calledMethods.add(mdec);
