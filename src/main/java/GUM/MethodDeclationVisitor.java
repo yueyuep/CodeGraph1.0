@@ -15,7 +15,6 @@ import java.io.Reader;
 import java.util.HashMap;
 import java.util.List;
 
-import static com.github.javaparser.JavaParser.parse;
 
 /**
  * Create by lp on 2020/1/16

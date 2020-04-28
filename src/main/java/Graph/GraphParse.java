@@ -62,19 +62,22 @@ public class GraphParse {
         List<SourceRoot> sourceRoots = projectRoot.getSourceRoots();
         for (SourceRoot sourceRoot : projectRoot.getSourceRoots()) {
             sourceRoot.getParserConfiguration().setAttributeComments(false); // Ignore comments
-            Path path1 = sourceRoot.getRoot();
-            List<ParseResult<CompilationUnit>> test = sourceRoot.tryToParse();
+            //Path path1 = sourceRoot.getRoot();
+            //List<ParseResult<CompilationUnit>> test = sourceRoot.tryToParse();
             for (ParseResult<CompilationUnit> r : sourceRoot.tryToParse()) {
                 r.getResult().ifPresent(compilationUnit -> {
+                    //todo 内部类ClassOrInterfaceDeclaration也会被遍历出来。区分出来
+                    List<ClassOrInterfaceDeclaration> classOrInterfaceDeclarations = compilationUnit.findAll(ClassOrInterfaceDeclaration.class);
                     for (ClassOrInterfaceDeclaration c : compilationUnit.findAll(ClassOrInterfaceDeclaration.class)) {
                         List<MethodDeclaration> methodDeclarationList = c.findAll(MethodDeclaration.class);
-                        File pfile = null;
-                        try {
-                            pfile = getFile(methodDeclarationList.get(0), sourceRoots);
-                        } catch (Exception e) {
-                            System.out.println("java文件中不存在函数声明\n");
-                            e.printStackTrace();
+                        /*TODO
+                         *  内部类函数，我们需要拿到他所在的文件名.并且拿到所在的内部类 我们是通过函数声明拿到函数申明所在的文件名*/
+                        if (methodDeclarationList.size() == 0) {
+                            System.out.println("==========接口文件： 跳过");
+                            continue;
                         }
+                        File pfile = getFile(methodDeclarationList.get(0), sourceRoots);
+                        System.out.println("==========处理文件：" + pfile.getPath());
                         //存储第一行数据
                         new GraphParse()
                                 .headOfJson(pfile, methodDeclarationList, SaveCat, projectInfo);
@@ -85,7 +88,7 @@ public class GraphParse {
                              * */
                             HashMap<MethodCallExpr, MethodCall> callMethod = Utils.getcallMethods(pfile, methodDeclaration, sourceRoots);
                             new GraphParse()
-                                    .methodOfJson(pfile, methodDeclaration, callMethod, SaveCat + pfile.getName() + ".txt", projectInfo);
+                                    .methodOfJson(pfile, methodDeclaration, callMethod, SaveCat, projectInfo);
 
                         }
                     }
@@ -98,8 +101,8 @@ public class GraphParse {
     }
 
     public void headOfJson(File file, List<MethodDeclaration> methodDeclarations, String saveFilePath, ProjectInfo projectInfo) {
-        String[] array = file.getPath().split("\\\\");
-        this.fileName = file.getName();
+        /*获得文件得相对路径*/
+        this.fileName = file.toString().replace(projectInfo.getPrifxPath(), "");
         this.version = projectInfo.getVersion();
         // 函数名-类名.类名-参数类型-参数类型
         // 无参函数： 函数名-类名.类名-
@@ -108,15 +111,18 @@ public class GraphParse {
                         getClassNameOfMethod(methodDeclaration) + "-" +
                         getMethodParameter(methodDeclaration)
         ));
+        saveFilePath = saveFilePath + file.getName() + ".txt";
+        //TODO 此处的保存路径，需要设置的与原路径相同
         Utils.saveToJsonFile(new HeadAndBodyToJson.Head(this.fileName, this.version, this.callMethodName), saveFilePath);
     }
 
     public void methodOfJson(File file, MethodDeclaration methodDeclaration, HashMap<MethodCallExpr, MethodCall> CalledMethod, String savaFilePath, ProjectInfo projectInfo) {
-        this.fileName = file.getName();
+        this.fileName = file.toString().replace(projectInfo.getPrifxPath(), "");
         this.version = projectInfo.getVersion();
         this.methodName = methodDeclaration.getNameAsString() + "-" + getClassNameOfMethod(methodDeclaration) + "-" + getMethodParameter(methodDeclaration);
         HeadAndBodyToJson.Body body = new HeadAndBodyToJson.Body(file, this.fileName, this.version, this.methodName, methodDeclaration, CalledMethod);
         body.addFeatureMethodOfJson();
+        savaFilePath = savaFilePath + file.getName() + ".txt";
         Utils.saveToJsonFile(body, savaFilePath);
     }
 
@@ -214,8 +220,15 @@ public class GraphParse {
         return StringUtils.join(res.toArray(), "-");
     }
 
-    private static File getFile(MethodDeclaration methodDeclaration, List<SourceRoot> sourceRoots) {
-        //TODO 需要测试这里的功能
+    private static File getFile(List<MethodDeclaration> methodDeclarationList, List<SourceRoot> sourceRoots) {
+        /**
+         *@Author:lp on 2020/4/29 0:05
+         *@Param: [methodDeclarationList, sourceRoots]
+         *@return: java.io.File
+         *@Description:返回我们处理函数声明所在的文件路径，需要解决外部类，内部类
+         */
+
+        //TODO 需要测试这里的功能，对给定的函数申明找到函数声明所在的具体文件，内部类、外部类
         ResolvedMethodDeclaration me = methodDeclaration.resolve();
         JavaParserMethodDeclaration jme = (JavaParserMethodDeclaration) me;
         String joinPath = jme

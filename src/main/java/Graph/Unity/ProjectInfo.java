@@ -9,11 +9,15 @@ import java.nio.file.Path;
  */
 @Data
 public class ProjectInfo {
+    /*记录项目在本地的地址*/
     String version;
     String prifxPath;
 
+    public ProjectInfo() {
+    }
+
     public ProjectInfo(Path path) {
-        prifxPath = path.toString();
+        prifxPath = path.toString()+"\\";
         String[] strings = path.toString().split("\\\\");
         this.version = strings[strings.length - 1];
 

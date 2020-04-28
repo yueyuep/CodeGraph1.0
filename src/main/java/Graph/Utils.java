@@ -1,5 +1,4 @@
 package Graph;
-
 import Graph.Base.FunctionParse;
 import Graph.Unity.MethodCall;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
@@ -10,7 +9,6 @@ import com.github.javaparser.symbolsolver.javaparsermodel.declarations.JavaParse
 import com.github.javaparser.utils.SourceRoot;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-
 import javax.swing.*;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -85,7 +83,7 @@ public class Utils {
         Gson gson = new GsonBuilder().disableHtmlEscaping()
                 .excludeFieldsWithoutExposeAnnotation()
                 .create();
-        String jsonString = gson.toJson(object);//去掉转移字符
+        String jsonString = gson.toJson(object).replace("\\\\","/");//去掉转移字符
         saveToFile(jsonString, fileName);
     }
 
