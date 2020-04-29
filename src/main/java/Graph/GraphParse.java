@@ -1,11 +1,13 @@
 package Graph;
 
 import Graph.Base.HeadAndBodyToJson;
+import Graph.Unity.FileMethodDeclationInfo;
 import Graph.Unity.MethodCall;
 import Graph.Unity.ProjectInfo;
 import com.github.javaparser.ParseResult;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
+import com.github.javaparser.ast.PackageDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
@@ -25,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Create by lp on 2020/2/5
@@ -67,31 +70,25 @@ public class GraphParse {
             for (ParseResult<CompilationUnit> r : sourceRoot.tryToParse()) {
                 r.getResult().ifPresent(compilationUnit -> {
                     //todo 内部类ClassOrInterfaceDeclaration也会被遍历出来。区分出来
-                    List<ClassOrInterfaceDeclaration> classOrInterfaceDeclarations = compilationUnit.findAll(ClassOrInterfaceDeclaration.class);
-                    for (ClassOrInterfaceDeclaration c : compilationUnit.findAll(ClassOrInterfaceDeclaration.class)) {
-                        List<MethodDeclaration> methodDeclarationList = c.findAll(MethodDeclaration.class);
-                        /*TODO
-                         *  内部类函数，我们需要拿到他所在的文件名.并且拿到所在的内部类 我们是通过函数声明拿到函数申明所在的文件名*/
-                        if (methodDeclarationList.size() == 0) {
-                            System.out.println("==========接口文件： 跳过");
-                            continue;
-                        }
-                        File pfile = getFile(methodDeclarationList.get(0), sourceRoots);
-                        System.out.println("==========处理文件：" + pfile.getPath());
-                        //存储第一行数据
+                    FileMethodDeclationInfo fileMethodDeclationInfo = new FileMethodDeclationInfo(compilationUnit, sourceRoots);
+                    ClassOrInterfaceDeclaration parentClassOrInterfaceDeclaration = fileMethodDeclationInfo.getParentClassOrInterfaceDeclaration();
+                    File pfile = fileMethodDeclationInfo.getFile();
+                    List<MethodDeclaration> methodDeclarationList = fileMethodDeclationInfo.getMethodDeclarationList();
+                    System.out.println("==========处理文件：" + pfile.getPath());
+                    //存储第一行数据
+                    new GraphParse()
+                            .headOfJson(pfile, methodDeclarationList, SaveCat, projectInfo);
+                    for (MethodDeclaration methodDeclaration : parentClassOrInterfaceDeclaration.findAll(MethodDeclaration.class)) {
+                        // TODO 文件的路径查找有问题
+                        /*
+                         * 函数调用的存储格式
+                         * */
+                        HashMap<MethodCallExpr, MethodCall> callMethod = Utils.getcallMethods(pfile, methodDeclaration, sourceRoots);
                         new GraphParse()
-                                .headOfJson(pfile, methodDeclarationList, SaveCat, projectInfo);
-                        for (MethodDeclaration methodDeclaration : c.findAll(MethodDeclaration.class)) {
-                            // TODO 文件的路径查找有问题
-                            /*
-                             * 函数调用的存储格式
-                             * */
-                            HashMap<MethodCallExpr, MethodCall> callMethod = Utils.getcallMethods(pfile, methodDeclaration, sourceRoots);
-                            new GraphParse()
-                                    .methodOfJson(pfile, methodDeclaration, callMethod, SaveCat, projectInfo);
+                                .methodOfJson(pfile, methodDeclaration, callMethod, SaveCat, projectInfo);
 
-                        }
                     }
+
 
                 });
             }
@@ -218,26 +215,6 @@ public class GraphParse {
         }
 
         return StringUtils.join(res.toArray(), "-");
-    }
-
-    private static File getFile(List<MethodDeclaration> methodDeclarationList, List<SourceRoot> sourceRoots) {
-        /**
-         *@Author:lp on 2020/4/29 0:05
-         *@Param: [methodDeclarationList, sourceRoots]
-         *@return: java.io.File
-         *@Description:返回我们处理函数声明所在的文件路径，需要解决外部类，内部类
-         */
-
-        //TODO 需要测试这里的功能，对给定的函数申明找到函数声明所在的具体文件，内部类、外部类
-        ResolvedMethodDeclaration me = methodDeclaration.resolve();
-        JavaParserMethodDeclaration jme = (JavaParserMethodDeclaration) me;
-        String joinPath = jme
-                .getQualifiedName()
-                .replace(".", "//")
-                .replace("//" + methodDeclaration.getNameAsString(), "")
-                + ".java";
-        return MethodCall.getFullPath(sourceRoots, joinPath);
-
     }
 
 
