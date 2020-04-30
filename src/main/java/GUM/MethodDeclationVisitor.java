@@ -7,6 +7,7 @@ import com.github.gumtreediff.io.LineReader;
 import com.github.gumtreediff.tree.TreeContext;
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ParseProblemException;
+import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.MethodDeclaration;
 
@@ -32,7 +33,7 @@ public class MethodDeclationVisitor extends JavaParserGenerator {
         LineReader lr = new LineReader(r);
 
         try {
-            CompilationUnit cu = JavaParser.parse(lr);
+            CompilationUnit cu = StaticJavaParser.parse(lr);
 
             List<MethodDeclaration> mcu = cu.findAll(MethodDeclaration.class);
             for (MethodDeclaration methodDeclaration : mcu) {

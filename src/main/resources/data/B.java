@@ -4,7 +4,15 @@ package data;
  * Create by lp on 2020/1/4
  */
 public class B {
-    public B() {
+    private String name;
+
+    public B(String name) {
+        this.name = name;
+
+    }
+
+    public static B newInstance(String name) {
+        return new B(name);
 
     }
 

@@ -361,10 +361,10 @@ public class AST2Graph extends ParseUtil implements Graph {//实现了图的接�
                 addChildNode(switchStmt, switchStmt.getSelector());
                 addChildNodeList(switchStmt, switchStmt.getEntries());
                 processNodeListNodeTravel(switchStmt.getEntries());
-            } else if (isContain(nodeClassPackage, "SwitchEntryStmt")) {
-                SwitchEntryStmt switchEntryStmt = (SwitchEntryStmt) node;
+            } else if (isContain(nodeClassPackage, "SwitchEntry")) {
+                SwitchEntry switchEntryStmt = (SwitchEntry) node;
                 addChildToken(switchEntryStmt, nodeClass);
-                addChildOptionalNode(switchEntryStmt, switchEntryStmt.getLabel());
+                addChildOptionalNode(switchEntryStmt, switchEntryStmt.getParentNode());
                 addChildNodeList(switchEntryStmt, switchEntryStmt.getStatements());
             } else if (isContain(nodeClassPackage, "ReturnStmt")) {
                 ReturnStmt returnStmt = (ReturnStmt) node;
@@ -651,11 +651,11 @@ public class AST2Graph extends ParseUtil implements Graph {//实现了图的接�
             } else if (isContain(nodeClassPackage, "SuperExpr")) {
                 SuperExpr superExpr = (SuperExpr) node;
                 addChildToken(superExpr, nodeClass);
-                addChildOptionalNode(superExpr, superExpr.getClassExpr());
+                addChildOptionalNode(superExpr, superExpr.getTypeName());
             } else if (isContain(nodeClassPackage, "ThisExpr")) {
                 ThisExpr thisExpr = (ThisExpr) node;
                 addChildToken(thisExpr, nodeClass);
-                addChildOptionalNode(thisExpr, thisExpr.getClassExpr());
+                addChildOptionalNode(thisExpr, thisExpr.getTypeName());
                 stringPrint(nodeClass);
             } else {
                 addChildNodeList(node, node.getChildNodes());
@@ -736,10 +736,10 @@ public class AST2Graph extends ParseUtil implements Graph {//实现了图的接�
                         addNextExecEdge(node, selector);
                         mPreNodes.clear();
                         mBreakNodes.clear();
-                        for (SwitchEntryStmt entry : switchStmt.getEntries()) {
+                        for (SwitchEntry entry : switchStmt.getEntries()) {
                             mPreNodes.add(selector);
                             addNextExecEdgeForAllPres(entry);
-                            entry.getLabel().ifPresent(label -> {
+                            entry.getLabels().stream().forEach(label -> {
                                 addNextExecEdge(entry, label);
                             });
                             resetPreNodes(entry);
@@ -1131,7 +1131,7 @@ public class AST2Graph extends ParseUtil implements Graph {//实现了图的接�
         optionalList.ifPresent(nodeList -> addChildNodeList(o, nodeList));
     }
 
-    public void addChildModifiers(Node node, EnumSet<Modifier> modifiers) {
+    public void addChildModifiers(Node node, NodeList<Modifier> modifiers) {
         if (!modifiers.isEmpty()) {
             Modifier before = null;
             for (Modifier modifier : modifiers) {
@@ -1270,7 +1270,7 @@ public class AST2Graph extends ParseUtil implements Graph {//实现了图的接�
         }
     }
 
-    public void processModifiers(EnumSet<Modifier> modifierEnumSet) {
+    public void processModifiers(NodeList<Modifier> modifierEnumSet) {
         for (Modifier m : modifierEnumSet) {
             stringPrint(m.toString());
         }

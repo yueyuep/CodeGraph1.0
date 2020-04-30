@@ -1,4 +1,4 @@
-package mdata;
+package data;
 
 
 /**
@@ -15,11 +15,16 @@ public class A {
         }
     }
 
+    public static <E> OrderedPSet<E> from(final Collection<? extends E> list) {
+        if (list instanceof OrderedPSet) return (OrderedPSet<E>) list;
+        return OrderedPSet.<E>empty().plusAll(list);
+    }
+
     public static void main(String[] args) {
         int[] arrays = new int[]{1, 2, 3, 4, 5};
         System.out.println("测试");
-        B b = new B();
-        b.test();
+        B b =B.newInstance("test").test();
+
         b.test1("lipeng");
     }
 

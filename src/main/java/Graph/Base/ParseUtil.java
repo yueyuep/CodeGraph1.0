@@ -1,6 +1,7 @@
 package Graph.Base;
 
 import com.github.javaparser.JavaParser;
+import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.FieldDeclaration;
@@ -38,12 +39,12 @@ public class ParseUtil {
         mSrcFilePath = srcFilePath;
 
         try {
-            mCompilationUnit = JavaParser.parse(new FileInputStream(mSrcFilePath));
+            mCompilationUnit = StaticJavaParser.parse(new FileInputStream(mSrcFilePath));
         } catch (Exception e) {
             System.out.println(mSrcFilePath + "\n" + e);
         }
 
-        mCompilationUnit = JavaParser.parse(new FileInputStream(mSrcFilePath));//编译单元
+        mCompilationUnit = StaticJavaParser.parse(new FileInputStream(mSrcFilePath));//编译单元
 
         mMethodDeclarations = mCompilationUnit.findAll(MethodDeclaration.class);
         //注意lambda表达式的用法

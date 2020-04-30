@@ -21,6 +21,7 @@ import java.util.Set;
  * Create by lp on 2020/4/17
  */
 public class Bla {
+
     public static void main(String[] args) throws IOException {
 
         ProjectRoot projectRoot = new SymbolSolverCollectionStrategy().collect(Paths.get("").toAbsolutePath());
