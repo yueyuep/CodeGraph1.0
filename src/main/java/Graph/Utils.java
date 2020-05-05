@@ -1,4 +1,5 @@
 package Graph;
+
 import Graph.Base.FunctionParse;
 import Graph.Unity.MethodCall;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
@@ -9,13 +10,13 @@ import com.github.javaparser.symbolsolver.javaparsermodel.declarations.JavaParse
 import com.github.javaparser.utils.SourceRoot;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+
 import javax.swing.*;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 
@@ -67,13 +68,21 @@ public class Utils {
         HashMap<String, HashMap<MethodDeclaration, String>> CalledMethod = new HashMap<>();
         List<MethodCallExpr> methodCallExprList = methodDeclaration.findAll(MethodCallExpr.class);
         for (MethodCallExpr methodCallExpr : methodCallExprList) {
-            ResolvedMethodDeclaration rmd = methodCallExpr.resolve();
-            if (rmd instanceof JavaParserMethodDeclaration) {
-                /*不处理系统或者API函数*/
-                methodCallList.put(methodCallExpr, new MethodCall((JavaParserMethodDeclaration) rmd, sourceRoots));
+            try {
+                ResolvedMethodDeclaration rmd = methodCallExpr.resolve();
+                if (rmd instanceof JavaParserMethodDeclaration) {
+                    /*不处理系统或者API函数*/
+                    methodCallList.put(methodCallExpr, new MethodCall((JavaParserMethodDeclaration) rmd, sourceRoots));
 
+                }
 
+            } catch (Exception e) {
+                /*是系统库函数。无法解析到具体调用的位置*/
+                //System.out.println("Exception->getcallMethods->:" + methodCallExpr.getNameAsString());
+
+                continue;
             }
+
 
         }
         return methodCallList;
@@ -84,7 +93,7 @@ public class Utils {
         Gson gson = new GsonBuilder().disableHtmlEscaping()
                 .excludeFieldsWithoutExposeAnnotation()
                 .create();
-        String jsonString = gson.toJson(object).replace("\\\\","/");//去掉转移字符
+        String jsonString = gson.toJson(object).replace("\\\\", "/");//去掉转移字符
         saveToFile(jsonString, fileName);
     }
 

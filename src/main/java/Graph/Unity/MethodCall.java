@@ -1,10 +1,12 @@
 package Graph.Unity;
+
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.symbolsolver.javaparsermodel.declarations.JavaParserMethodDeclaration;
 import com.github.javaparser.symbolsolver.javaparsermodel.declarations.JavaParserParameterDeclaration;
 import com.github.javaparser.utils.SourceRoot;
 import lombok.Data;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -39,8 +41,8 @@ public class MethodCall {
                 .replace("//" + methodDeclaration.getNameAsString(), "")
                 + ".java";
 
-        //setpath
-        this.path=getFullPath(sourceRoots, joinPath).getPath();
+        //setpath，函数调用的全路径
+        this.path = getFullPath(sourceRoots, joinPath).getPath();
 
     }
 

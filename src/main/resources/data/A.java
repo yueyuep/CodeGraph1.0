@@ -1,6 +1,9 @@
 package data;
 
 
+import java.util.Arrays;
+import java.util.Comparator;
+
 /**
  * Create by lp on 2020/1/4
  */
@@ -23,7 +26,14 @@ public class A {
     public static void main(String[] args) {
         int[] arrays = new int[]{1, 2, 3, 4, 5};
         System.out.println("测试");
-        B b =B.newInstance("test").test();
+        B b = B.newInstance("test").test();
+        /*new 情况下的函数声明*/
+        Arrays.sort(args, new Comparator<String>() {
+            @Override
+            public int compare(String o1, String o2) {
+                return 0;
+            }
+        });
 
         b.test1("lipeng");
     }

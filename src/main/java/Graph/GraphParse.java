@@ -3,24 +3,20 @@ package Graph;
 import Graph.Base.HeadAndBodyToJson;
 import Graph.Unity.FileMethodDeclationInfo;
 import Graph.Unity.MethodCall;
+import Graph.Unity.MethodDeclationInfo;
 import Graph.Unity.ProjectInfo;
 import com.github.javaparser.ParseResult;
 import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
-import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.expr.MethodCallExpr;
-import com.github.javaparser.ast.expr.ObjectCreationExpr;
-import com.github.javaparser.ast.type.Type;
 import com.github.javaparser.symbolsolver.utils.SymbolSolverCollectionStrategy;
 import com.github.javaparser.utils.ProjectRoot;
 import com.github.javaparser.utils.SourceRoot;
-import org.apache.commons.lang.StringUtils;
+
 import java.io.File;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -50,16 +46,18 @@ public class GraphParse {
         //项目的具体信息
         ProjectInfo projectInfo = new ProjectInfo(path);
         ProjectRoot projectRoot = new SymbolSolverCollectionStrategy().collect(path);
-        ProcessMultiFile(projectRoot, SaveCat, projectInfo);
+        ProcessMultiFile(projectRoot, projectInfo);
     }
 
     /*文件处理的入口程序*/
-    public static void ProcessMultiFile(ProjectRoot projectRoot, String SaveCat, ProjectInfo projectInfo) throws Exception {
+    public static void ProcessMultiFile(ProjectRoot projectRoot, ProjectInfo projectInfo) throws Exception {
         /*MethodDeclation中的CallMethod的类型*/
         // 获得所有文件的内部类函数和外部类函数
         List<SourceRoot> sourceRoots = projectRoot.getSourceRoots();
         for (SourceRoot sourceRoot : projectRoot.getSourceRoots()) {
-            sourceRoot.getParserConfiguration().setAttributeComments(false); // Ignore comments
+            sourceRoot.getParserConfiguration().setAttributeComments(false);
+
+            // Ignore comments
             //Path path1 = sourceRoot.getRoot();
             //List<ParseResult<CompilationUnit>> test = sourceRoot.tryToParse();
             for (ParseResult<CompilationUnit> r : sourceRoot.tryToParse()) {
@@ -67,23 +65,27 @@ public class GraphParse {
                     //todo 内部类ClassOrInterfaceDeclaration也会被遍历出来。区分出来
                     FileMethodDeclationInfo fileMethodDeclationInfo = new FileMethodDeclationInfo(compilationUnit, sourceRoots);
                     ClassOrInterfaceDeclaration parentClassOrInterfaceDeclaration = fileMethodDeclationInfo.getParentClassOrInterfaceDeclaration();
+
                     File pfile = fileMethodDeclationInfo.getFile();
                     List<MethodDeclaration> methodDeclarationList = fileMethodDeclationInfo.getMethodDeclarationList();
-                    System.out.println("==========处理文件：" + pfile.getPath());
+                    System.out.println("==========处理文件：" + pfile.toString());
+                    /*保存的文件路径*/
+                    String SaveCat = getSavePath(projectInfo, pfile);
                     //存储第一行数据
                     new GraphParse()
-                            .headOfJson(pfile, methodDeclarationList, SaveCat, projectInfo);
-                    for (MethodDeclaration methodDeclaration : parentClassOrInterfaceDeclaration.findAll(MethodDeclaration.class)) {
+                            .headOfJson(pfile, fileMethodDeclationInfo.getMethodDeclationInfoList(), SaveCat, projectInfo);
+
+                    //注解类型先过滤掉
+                    for (MethodDeclationInfo methodDeclationInfo : fileMethodDeclationInfo.getMethodDeclationInfoList()) {
                         // TODO 文件的路径查找有问题
                         /*
                          * 函数调用的存储格式
                          * */
-                        HashMap<MethodCallExpr, MethodCall> callMethod = Utils.getcallMethods(pfile, methodDeclaration, sourceRoots);
+                        HashMap<MethodCallExpr, MethodCall> callMethod = Utils.getcallMethods(pfile, methodDeclationInfo.getMethodDeclaration(), sourceRoots);
+
                         new GraphParse()
-                                .methodOfJson(pfile, methodDeclaration, callMethod, SaveCat, projectInfo);
-
+                                .methodOfJson(pfile, methodDeclationInfo, callMethod, SaveCat, projectInfo);
                     }
-
 
                 });
             }
@@ -92,124 +94,43 @@ public class GraphParse {
 
     }
 
-    public void headOfJson(File file, List<MethodDeclaration> methodDeclarations, String saveFilePath, ProjectInfo projectInfo) {
+    public void headOfJson(File file, List<MethodDeclationInfo> methodDeclationInfos, String saveFilePath, ProjectInfo projectInfo) {
         /*获得文件得相对路径*/
         this.fileName = file.toString().replace(projectInfo.getPrifxPath(), "");
         this.version = projectInfo.getVersion();
         // 函数名-类名.类名-参数类型-参数类型
-        // 无参函数： 函数名-类名.类名-
-        methodDeclarations.forEach(methodDeclaration -> this.callMethodName.add(
-                methodDeclaration.getNameAsString() + "-" +
-                        getClassNameOfMethod(methodDeclaration) + "-" +
-                        getMethodParameter(methodDeclaration)
+        // TODO(new、其他情况) 无参函数： 函数名-类名.类名-
+        methodDeclationInfos.forEach(methodDeclationInfo -> this.callMethodName.add(
+                methodDeclationInfo.getMethodDeclaration().getNameAsString() + "-" +
+                        methodDeclationInfo.getMeOfClassName() + "-" +
+                        methodDeclationInfo.getMethodParameter()
         ));
-        saveFilePath = saveFilePath + file.getName() + ".txt";
         //TODO 此处的保存路径，需要设置的与原路径相同
         Utils.saveToJsonFile(new HeadAndBodyToJson.Head(this.fileName, this.version, this.callMethodName), saveFilePath);
     }
 
-    public void methodOfJson(File file, MethodDeclaration methodDeclaration, HashMap<MethodCallExpr, MethodCall> CalledMethod, String savaFilePath, ProjectInfo projectInfo) {
+    public void methodOfJson(File file, MethodDeclationInfo methodDeclationInfo, HashMap<MethodCallExpr, MethodCall> CalledMethod, String savaFilePath, ProjectInfo projectInfo) {
         this.fileName = file.toString().replace(projectInfo.getPrifxPath(), "");
         this.version = projectInfo.getVersion();
-        this.methodName = methodDeclaration.getNameAsString() + "-" + getClassNameOfMethod(methodDeclaration) + "-" + getMethodParameter(methodDeclaration);
-        HeadAndBodyToJson.Body body = new HeadAndBodyToJson.Body(file, this.fileName, this.version, this.methodName, methodDeclaration, CalledMethod);
-        body.addFeatureMethodOfJson();
-        savaFilePath = savaFilePath + file.getName() + ".txt";
+        this.methodName = methodDeclationInfo.getMethodDeclaration()
+                .getNameAsString() + "-" + methodDeclationInfo.getMeOfClassName() + "-" + methodDeclationInfo.getMethodParameter();
+
+        HeadAndBodyToJson.Body body = new HeadAndBodyToJson.Body(file, this.fileName, this.version, this.methodName, methodDeclationInfo.getMethodDeclaration(), CalledMethod);
+        body.addFeatureMethodOfJson(projectInfo);
         Utils.saveToJsonFile(body, savaFilePath);
     }
 
-    /**
-     * @Description: 返回函数的类名，多层嵌套
-     * @Param:
-     * @return:
-     * @Author: Kangaroo
-     * @Date: 2019/10/22
-     */
-    public String getClassNameOfMethod(Node methodDeclaration) {
-        List<String> allClassName = new ArrayList<>();
-
-        while (methodDeclaration.getParentNode().isPresent() && !(methodDeclaration.getParentNode().get() instanceof CompilationUnit)) {
-
-            if (methodDeclaration.getParentNode().get() instanceof ClassOrInterfaceDeclaration) {
-                allClassName.add(((ClassOrInterfaceDeclaration) methodDeclaration.getParentNode().get()).getName().toString());
-            } else if (methodDeclaration.getParentNode().get() instanceof ObjectCreationExpr) {
-                // TODO
-                // 函数定义在 new 类名(){}中的情况暂不完善
-                //
-//                allClassName.add(((ObjectCreationExpr)methodDeclaration.getParentNode().get()).getTypeAsString());
-                System.out.println("GraphParse Info:new MethodDeclation" + methodDeclaration.toString());
-
-            } else {
-                // TODO
-                // 第二种情况再往上遍历时，会找到其他类型的节点
-
-//                System.out.println("此情况未考虑");
-//                System.exit(0);
-                System.out.println("GraphParse Info:Other MethodDeclation" + methodDeclaration.toString());
-            }
-            methodDeclaration = methodDeclaration.getParentNode().get();
+    public static String getSavePath(ProjectInfo projectInfo, File pfile) {
+        String name1 = pfile.toString().replace(projectInfo.getVersion(), projectInfo.getVersion() + "_G");
+        String name2 = name1.replace(pfile.getName(), "");
+        File cat = new File(name2);
+        if (!cat.exists()) {
+            cat.mkdirs();
         }
 
-        Collections.reverse(allClassName);
-        return StringUtils.join(allClassName.toArray(), ".");
-    }
+        return cat + "\\" + pfile.getName().replace(".java", ".txt");
 
-    /**
-     * @Description: 获取带参数类型的函数名
-     * @Param:
-     * @return: String
-     * @Author: Kangaroo
-     * @Date: 2019/10/22
-     */
-    public String getMethodParameter(MethodDeclaration methodDeclaration) {
-        List<String> res = new ArrayList<>();
 
-        for (Parameter parameter : methodDeclaration.getParameters()) {
-            Type type = parameter.getType();
-            String string = new String();
-
-            if (type.isArrayType()) {
-                string = parameter.getType().asArrayType().asString();
-
-            } else if (type.isClassOrInterfaceType()) {
-                string = parameter.getType().asClassOrInterfaceType().asString();
-
-            } else if (type.isIntersectionType()) {
-                string = parameter.getType().asIntersectionType().asString();
-
-            } else if (type.isPrimitiveType()) {
-                string = parameter.getType().asPrimitiveType().asString();
-
-            } else if (type.isReferenceType()) {
-                System.out.println("ReferenceType");
-                // pass
-
-            } else if (type.isTypeParameter()) {
-                string = parameter.getType().asTypeParameter().asString();
-
-            } else if (type.isUnionType()) {
-                string = parameter.getType().asUnionType().asString();
-
-            } else if (type.isUnknownType()) {
-                string = parameter.getType().asUnknownType().asString();
-
-            } else if (type.isVarType()) {
-                string = parameter.getType().asVarType().asString();
-
-            } else if (type.isVoidType()) {
-                string = parameter.getType().asVoidType().asString();
-
-            } else if (type.isWildcardType()) {
-                string = parameter.getType().asWildcardType().asString();
-
-            } else {
-                System.out.println("Wrong!");
-                System.exit(0);
-            }
-            res.add(string);
-        }
-
-        return StringUtils.join(res.toArray(), "-");
     }
 
 

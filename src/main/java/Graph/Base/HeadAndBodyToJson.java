@@ -3,6 +3,7 @@ package Graph.Base;
 import Graph.AST2Graph;
 import Graph.Unity.MethodCall;
 import Graph.RangeNode;
+import Graph.Unity.ProjectInfo;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.google.common.graph.MutableNetwork;
@@ -21,7 +22,9 @@ public class HeadAndBodyToJson {
      * fileName:
      * version:
      * hasMethodName:
+     *
      */
+
     public static class Head {
         @Expose
         @SerializedName(value = "fileName")
@@ -74,7 +77,6 @@ public class HeadAndBodyToJson {
         @Expose
         @SerializedName(value = "attribute")
 
-
         private List<String> nodeAttribute = new ArrayList<>();
 
         public Body(File file, String fileName, String version, String methodName, MethodDeclaration methodDeclaration,
@@ -88,9 +90,8 @@ public class HeadAndBodyToJson {
 
         }
 
-
         /*填充body字段信息*/
-        public void addFeatureMethodOfJson() {
+        public void addFeatureMethodOfJson(ProjectInfo projectInfo) {
             this.ast2Graph.initNetwork();
             this.ast2Graph.constructNetwork(this.methodDeclaration);
             MutableNetwork<Object, String> mutableNetwork = this.ast2Graph.getNetwork();
@@ -111,16 +112,15 @@ public class HeadAndBodyToJson {
                         int index = nodeMap.get(node);
                         vistedMethodCallex.put(methodCallExpr, index);
                         //需要找到函数调用MethodCall 将其转换成字符串。
-                        // TODO 这里的hashmap比较，需要确定能够找到
-                        String res = MethodCall.mcToString(this.calledMethod.get(methodCallExpr));
+                        //TODO 这里的hashmap比较，需要确定能够找到
+                        //TODO 这里需要测试，相对路径的获取是否正确。
+                        String res = MethodCall.mcToString(this.calledMethod.get(methodCallExpr)).replace(projectInfo.getPrifxPath(), "");
                         this.callMethodNameReferTo.put(index, res);
                     }
                 }
             }
-
             // 添加节点总数字段
             this.nodeNumber = nodeIndex;
-
             // 添加节点关系（后继）字段
             for (Object node : mutableNetwork.nodes()) {
                 List<Integer> tempNode = mutableNetwork.successors(node).stream()
